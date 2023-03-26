@@ -1,0 +1,160 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<style>
+      .clickable{
+	display:inline;
+	background-color: yellow;
+      }
+
+.column {
+  float: left;
+  padding: 5px;
+}
+.column.side{
+width:35%;
+}
+.column.middle{
+width:63%;
+}
+.row::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+@media screen and (max-width:600px) {
+  .column.side, .column.middle{
+    width: 100%;
+  }
+}
+    </style>
+    <title>Naked Bible Transcript Search</title>
+    <script src="//code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+    <script type="text/javascript" charset="utf-8">
+            var socket ;
+        $(document).ready(function() {
+
+/*
+            #var server = http.createServer();
+            #server.listen(5005, "127.0.0.1");
+            #var socket = io.listen(server);
+            #var socket = new io.Socket();
+            #socket.connect('http://'127.0.0.1:5005/naked');
+            #var socket = io('http://'127.0.0.1:5005/naked');
+*/
+            namespace = '/naked';
+            socket = io(namespace);
+            socket.on('connect', function() {
+                socket.emit('my_event', {data: 'connected to the SocketServer...'});
+            });
+            socket.on('my_response', function(msg, cb) {
+                //$('#log').append('<br>' + $('<div/>').text('logs #' + msg.count + ': ' + msg.data).html());
+                if (cb)
+                    cb();
+            });
+            socket.on('search_response', function(data) {
+		const rows= JSON.parse(data["data"]);
+		//console.log(rows);
+		document.getElementById("log").innerHTML = "";
+		const groupedByEpisode= rows.reduce((group, row) => { const { EpisodeNum} = row; group[EpisodeNum] = group[EpisodeNum] ?? []; group[EpisodeNum].push(row); return group; }, {});
+		//console.log(groupedByEpisode);
+for(let item in groupedByEpisode) {
+   var episode= groupedByEpisode[item];
+		//console.log(episode);
+		var first=episode[0];
+		var start="<div>"+first.EpisodeNum+" "+first.Title+":";		
+		var end=" ";
+	for (let j = 0; j < episode.length; j++) {
+		row = episode[j];
+		end += '<div class="clickable" onclick="getImage('+row.PageNumb+')"> '+row.PageNumb+' </div>';
+	        };
+		end +="</div>";
+	//	console.log(start);
+	//	console.log(end);
+                //$('#log').append('<br>' + $('<div/>').text(start+end).html());
+ 		$(start+end).appendTo('#log');
+}
+	    });
+            socket.on('image_response', function(data) {
+	var mySvg=document.getElementById('svg');
+	//mySvg.outerHTML += data;
+	mySvg.innerHTML = data;
+/*
+url to physical file works
+		//console.log(data);
+		var img_url = data; //data.image_data;
+		//console.log(img_url);
+                document.getElementById("fig_image").src = img_url;
+*/
+            });
+            $('form#image_event').submit(function(event) {
+                socket.emit('image_event', {data: $('#id').val()});
+                return false;
+            });
+            $('form#keyword').submit(function(event) {
+                socket.emit('keyword', {data: $('#word').val()});
+                return false;
+            });
+            $('form#episodetitle').submit(function(event) {
+                socket.emit('episodetitle', {data: $('#eword').val()});
+                return false;
+            });
+            $('form#episodeid').submit(function(event) {
+		//console.log($('#eid').val());
+                socket.emit('episodeid', {data: $('#eid').val()});
+                return false;
+            });
+
+            $('form#broadcast').submit(function(event) {
+                socket.emit('my_broadcast_event', {data: $('#broadcast_data').val()});
+                return false;
+            });
+            $('form#disconnect').submit(function(event) {
+                socket.emit('disconnect_request');
+                return false;
+            });
+        });
+	function getImage(n){
+		//console.log(n);
+                socket.emit('image_event', {data: n});
+	};
+    </script>
+</head>
+<body style="background-color:white;">
+
+<div class="row">
+    <div class="column side">
+    <h1 style="background-color:white;">Naked Bible Transcript Search</h1>
+    <div id="nav">
+    <form id="keyword" method="POST" action='#'>
+        <input type="text" name="word" id="word" placeholder="Key Word">
+        <input type="submit" value="Search Key word">
+    </form>
+    <form id="episodetitle" method="POST" action='#'>
+        <input type="text" name="eword" id="eword" placeholder="Key Word">
+        <input type="submit" value="Search Episode Title">
+    </form>
+    <form id="episodeid" method="POST" action='#'>
+        <input type="text" name="eid" id="eid" placeholder="Episode Number">
+        <input type="submit" value="Search Episode Number">
+    </form>
+    <form id="image_event" method="POST" action='#'>
+        <input type="text" name="id" id="id" placeholder="id">
+        <input type="submit" value="Show Page">
+    </form>
+
+    <form id="disconnect" method="POST" action="#">
+        <input type="submit" value="Disconnect Server">
+    </form>
+
+    </div>
+   <div id="log"> </div>
+</div>
+    <div class="column middle" id="svg"></div>
+</div>
+    <div id="xsvg"></div>
+    <!--img id = "fig_image" src="static/t0.png"-->
+</body>
+</html>
+
