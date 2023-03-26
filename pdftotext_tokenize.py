@@ -9,7 +9,7 @@ from nltk.corpus import stopwords
 nltk.download("stopwords")
 stopwords_ = set(stopwords.words("english"))
 
-doc = fitz.open("NBPTranscripts1-458.pdf")
+doc = fitz.open("../data/NBPTranscripts1-458.pdf")
 id =  0
 episode = 0
 title=""
@@ -45,7 +45,7 @@ df = pd.DataFrame(data=np.array(results),
                columns=['PageNumb','EpisodeNum','Title','Tokens','Text'])
 
 #parquet.write_table(df, "file.parquet")
-df.to_parquet("nakebibletranscript.parquet")
+df.to_parquet("../data/nakebibletranscript.parquet")
 
 #Intention
 #use duckDb to search by page number, episode, title, token and then use page number to display the page png by reading it out of pdf file
