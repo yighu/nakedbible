@@ -51,6 +51,11 @@ def handle_imageevent(msg):
     #pix = getPageImage(id)
     pix = getPageSVG(id)
     emit('image_response', pix)
+@socket_.on('text_event', namespace='/naked')
+def handle_Textevent(msg):
+    id = int(msg["data"])
+    rsp=getByPageText(id)
+    emit('text_response', rsp)
 
 @socket_.on('my_broadcast_event', namespace='/naked')
 def handle_broadcast_message(message):

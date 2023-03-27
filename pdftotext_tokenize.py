@@ -45,7 +45,7 @@ df = pd.DataFrame(data=np.array(results),
                columns=['PageNumb','EpisodeNum','Title','Tokens','Text'])
 
 #parquet.write_table(df, "file.parquet")
-df.to_parquet("../data/nakebibletranscript.parquet")
+df.to_parquet("../data/nakebibletranscript_v2.parquet")
 
 #Intention
 #use duckDb to search by page number, episode, title, token and then use page number to display the page png by reading it out of pdf file

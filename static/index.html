@@ -13,13 +13,13 @@
 
 .column {
   float: left;
-  padding: 5px;
+  padding: 0px;
 }
 .column.side{
 width:35%;
 }
 .column.middle{
-width:63%;
+width:65%;
 }
 .row::after {
   content: "";
@@ -92,8 +92,25 @@ url to physical file works
                 document.getElementById("fig_image").src = img_url;
 */
             });
+            socket.on('text_response', function(data) {
+		const rows= JSON.parse(data);
+		console.log(rows);
+		var todisplay="";
+		for(let k in rows) {
+		row = rows[k];
+		todisplay += row.PageNumb +" "+ row.EpisodeNum +" "+  row.Title +"<br/>";
+		todisplay += row.Text.replaceAll("\n", "<br/>");	
+		}
+	var mySvg=document.getElementById('svg');
+	//mySvg.outerHTML += data;
+	mySvg.innerHTML = todisplay;
+            });
             $('form#image_event').submit(function(event) {
                 socket.emit('image_event', {data: $('#id').val()});
+                return false;
+            });
+            $('form#text_event').submit(function(event) {
+                socket.emit('text_event', {data: $('#tid').val()});
                 return false;
             });
             $('form#keyword').submit(function(event) {
@@ -145,8 +162,27 @@ url to physical file works
     </form>
     <form id="image_event" method="POST" action='#'>
         <input type="text" name="id" id="id" placeholder="id">
-        <input type="submit" value="Show Page">
+        <input type="submit" value="Show Page Image">
     </form>
+
+    <form id="text_event" method="POST" action='#'>
+        <input type="text" name="tid" id="tid" placeholder="id">
+        <input type="submit" value="Show Page Text">
+    </form>
+
+    <form id="disconnect" method="POST" action="#">
+        <input type="submit" value="Disconnect Server">
+    </form>
+
+    </div>
+   <div id="log"> </div>
+</div>
+    <div class="column middle" id="svg"></div>
+</div>
+    <div id="xsvg"></div>
+    <!--img id = "fig_image" src="static/t0.png"-->
+</body>
+</html>
 
     <form id="disconnect" method="POST" action="#">
         <input type="submit" value="Disconnect Server">

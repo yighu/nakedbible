@@ -8,14 +8,17 @@ import base64
 pdfdoc = fitz.open("../data/NBPTranscripts1-458.pdf")
 MATRIX = fitz.Matrix(1, 1) 
 
-dbfile='../data/nakebible.parquet'
+dbfile='../data/nakebibletranscript_v2.parquet'
 
 
 def searchByPageNumbRange(f, t):
   return toJson(duckdb.query(f''' SELECT PageNumb,EpisodeNum, Title FROM '{dbfile}' WHERE PageNumb BETWEEN {f} AND {t} '''))
 
 def searchByPageNumb(n):
-  return toJson(duckdb.query(f''' SELECT PageNumb,EpisodeNum, Title FROM '{dbfile}' WHERE PageNumb = {n} '''))
+  return toJson(duckdb.query(f''' SELECT PageNumb,EpisodeNum, Title,Text FROM '{dbfile}' WHERE PageNumb = {n} '''))
+
+def getByPageText(n):
+  return toJson(duckdb.query(f''' SELECT PageNumb,EpisodeNum, Title,Text FROM '{dbfile}' WHERE PageNumb = {n} '''))
 
 def searchByEpisodNumb(n):
   return toJson(duckdb.query(f''' SELECT PageNumb,EpisodeNum, Title FROM '{dbfile}' WHERE EpisodeNum = {n}'''))
@@ -54,3 +57,8 @@ def getPageSVG(n):
 def toJson(data):
   return data.df().to_json(orient = 'records')
 
+
+
+#x=searchByPageNumb(1)
+x= getByPageText(1)
+print(x)
